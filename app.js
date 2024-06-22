@@ -5,10 +5,14 @@ const socketConfig = require('./src/socketIO')
 const bodyParser = require("body-parser");
 const port = 1100;
 const db = require("./connection");
+const cors = require('cors');
 
 //Inisialisasi koneksi Express Realtime dengan Socket IO
 const app = express();
 const server = http.createServer(app);
+
+//Awas API mu diblok wakkakaka
+app.use(cors());
 
 //Import Middleware
 const responses = require("./middleware/responseJSON");
@@ -16,16 +20,12 @@ const preventMultipleRequests = require('./middleware/preventMultipleRequest');
 const path = require("path");
 
 //Panggil fungsi SocketIO
-socketConfig(server);
+socketConfig(server)
 
 //Inisialisasi Penanganan pengiriman data dengan JSON
 app.use(bodyParser.json());
 
-app.get('/', (req, res)=> {
-    res.send('Home Routes Test')
-});
-
-app.get('/datas', (req, res)=> {
+app.get('/api/v1/get/data', (req, res)=> {
     db.query("SELECT * FROM perusahaan", (err, result) => {
         if (err) {
             // Jika terjadi error saat query
