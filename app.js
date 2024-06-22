@@ -39,7 +39,7 @@ app.get('/datas', (req, res)=> {
     });
 });
 
-app.post('/api/v1/post/voting', (req, res) => {
+app.post('/api/v1/post/voting', preventMultipleRequests, (req, res) => {
     const { stand_number } = req.body;
 
     if (!stand_number) {
