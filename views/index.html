@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Company Voting</title>
+</head>
+<body>
+    <h1>Real-time Company Voting</h1>
+
+    <div id="companies-list">
+        <ul id="company-list">
+            <!-- List of companies will be appended here dynamically -->
+        </ul>
+    </div>
+
+    <script>
+        const apiUrl = 'https://49kdgk28-1100.asse.devtunnels.ms/api/v1/get/data';
+
+        function fetchData() {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.payload && Array.isArray(data.payload.datas)) {
+                        displayCompanies(data.payload.datas);
+                    } else {
+                        console.error('Data format is incorrect:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
+
+        function displayCompanies(companies) {
+            const companyList = document.getElementById('company-list');
+            companyList.innerHTML = ''; // Clear the current list
+
+            companies.forEach(company => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${company.company_name}</span> <br>
+                    <span>Points: ${company.point}</span> <br>
+                    <button onclick="vote(${company.stand_number})">Vote</button>
+                `;
+                companyList.appendChild(listItem);
+            });
+        }
+
+        function vote(companyId) {
+            fetch('https://49kdgk28-1100.asse.devtunnels.ms/api/v1/post/voting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stand_number: companyId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Vote response:', data);
+                fetchData(); // Immediately fetch data to update the UI
+            })
+            .catch(error => {
+                console.error('Error voting:', error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            setInterval(fetchData, 1000); // Fetch data every second
+        });
+    </script>
+</body>
+</html>
